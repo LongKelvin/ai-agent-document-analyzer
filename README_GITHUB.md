@@ -46,7 +46,7 @@ cd ai-agent-document-analyzer
 
 # Or manual setup
 python -m venv venv
-source venv/bin/activate # On Windows: .\venv\Scripts\Activate.ps1
+source venv/bin/activate  # On Windows: .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
 # Configure environment
@@ -78,32 +78,32 @@ Open http://localhost:8000 in your browser
 
 ```
 app/
-├── main.py # FastAPI entry point
-├── config.py # Configuration management
+├── main.py              # FastAPI entry point
+├── config.py            # Configuration management
 ├── api/
-│ └── routes.py # REST endpoints
+│   └── routes.py        # REST endpoints
 ├── agent/
-│ ├── agent.py # AI orchestration
-│ └── prompts.py # Prompt engineering
+│   ├── agent.py         # AI orchestration
+│   └── prompts.py       # Prompt engineering
 ├── models/
-│ └── schemas.py # Pydantic validation
+│   └── schemas.py       # Pydantic validation
 ├── services/
-│ ├── llm.py # Gemini 2.0 Flash integration
-│ └── embeddings.py # RAG implementation
+│   ├── llm.py           # Gemini 2.0 Flash integration
+│   └── embeddings.py    # RAG implementation
 └── templates/
- └── index.html # Web interface
+    └── index.html       # Web interface
 ```
 
 ---
 
 ## Key Features
 
-[OK] **AI Agent with RAG** - Retrieves relevant context before analysis
-[OK] **Structured Output** - Pydantic ensures type safety
-[OK] **Evidence-Based** - Only references document content
-[OK] **No Hallucination** - Agent can say "unknown"
-[OK] **Clean Code** - Extensive comments explaining WHY
-[OK] **Educational** - Built for learning and teaching
+[OK] **AI Agent with RAG** - Retrieves relevant context before analysis  
+[OK] **Structured Output** - Pydantic ensures type safety  
+[OK] **Evidence-Based** - Only references document content  
+[OK] **No Hallucination** - Agent can say "unknown"  
+[OK] **Clean Code** - Extensive comments explaining WHY  
+[OK] **Educational** - Built for learning and teaching  
 
 ---
 
@@ -176,21 +176,21 @@ Analyzes document
 **Request:**
 ```json
 {
- "document_text": "Your document here..."
+  "document_text": "Your document here..."
 }
 ```
 
 **Response:**
 ```json
 {
- "success": true,
- "result": {
- "summary": "Brief summary",
- "completeness_status": "partial",
- "missing_points": ["Section A", "Section B"],
- "evidence": ["Quote 1", "Quote 2"],
- "confidence": 0.85
- }
+  "success": true,
+  "result": {
+    "summary": "Brief summary",
+    "completeness_status": "partial",
+    "missing_points": ["Section A", "Section B"],
+    "evidence": ["Quote 1", "Quote 2"],
+    "confidence": 0.85
+  }
 }
 ```
 
@@ -239,6 +239,6 @@ If this project helped you learn AI Agent development, consider giving it a star
 
 ---
 
-**Built with AI by Claude Sonnet 4.5 | Powered by Gemini 2.0 Flash**
+**Built with AI by Claude Sonnet 4.5**
 
 *Demonstrating the future of AI-assisted software development*
