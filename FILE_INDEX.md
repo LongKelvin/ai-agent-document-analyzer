@@ -1,10 +1,10 @@
-# 📑 Project File Index
+# Project File Index
 
 Complete reference of all files in the AI Agent Demo project.
 
 ---
 
-## 📖 Documentation Files
+## Documentation Files
 
 | File | Purpose | For |
 |------|---------|-----|
@@ -15,7 +15,7 @@ Complete reference of all files in the AI Agent Demo project.
 
 ---
 
-## ⚙️ Configuration Files
+## Configuration Files
 
 | File | Purpose | Edit? |
 |------|---------|-------|
@@ -26,7 +26,7 @@ Complete reference of all files in the AI Agent Demo project.
 
 ---
 
-## 🚀 Setup & Utility Scripts
+## Setup & Utility Scripts
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
@@ -35,7 +35,7 @@ Complete reference of all files in the AI Agent Demo project.
 
 ---
 
-## 🏗️ Application Code
+## Application Code
 
 ### Root Application Files
 
@@ -109,7 +109,7 @@ Complete reference of all files in the AI Agent Demo project.
 
 ---
 
-## 📊 File Statistics
+## File Statistics
 
 ```
 Total Files: 24
@@ -117,17 +117,17 @@ Total Files: 24
 ├── Configuration: 4 files
 ├── Scripts: 2 files
 └── Application Code: 14 files
-    ├── Core: 3 files
-    ├── API: 2 files
-    ├── Agent: 3 files
-    ├── Models: 2 files
-    ├── Services: 3 files
-    └── Frontend: 1 file
+ ├── Core: 3 files
+ ├── API: 2 files
+ ├── Agent: 3 files
+ ├── Models: 2 files
+ ├── Services: 3 files
+ └── Frontend: 1 file
 ```
 
 ---
 
-## 🎯 Files by Learning Priority
+## Files by Learning Priority
 
 ### 1. **Start Here** (Understanding the app)
 1. `README.md` - Overview and setup
@@ -149,7 +149,7 @@ Total Files: 24
 
 ---
 
-## 🔍 Find Files by Concept
+## Find Files by Concept
 
 ### Want to understand **Pydantic Validation**?
 Read: `app/models/schemas.py`
@@ -174,24 +174,24 @@ Read: `app/config.py`, `.env.example`
 
 ---
 
-## 📝 File Dependencies
+## File Dependencies
 
 ```
 app/main.py
-  ├── app/config.py
-  └── app/api/routes.py
-      ├── app/models/schemas.py
-      └── app/agent/agent.py
-          ├── app/agent/prompts.py
-          ├── app/services/llm.py
-          │   └── app/config.py
-          └── app/services/embeddings.py
-              └── app/config.py
+ ├── app/config.py
+ └── app/api/routes.py
+ ├── app/models/schemas.py
+ └── app/agent/agent.py
+ ├── app/agent/prompts.py
+ ├── app/services/llm.py
+ │ └── app/config.py
+ └── app/services/embeddings.py
+ └── app/config.py
 ```
 
 ---
 
-## 🛠️ Files You Should Modify
+## Files You Should Modify
 
 ### **Definitely Edit:**
 - `.env` - Add your API key
@@ -215,36 +215,36 @@ app/main.py
 
 ---
 
-## 📦 File Sizes (Approximate)
+## File Sizes (Approximate)
 
 ```
 Large Files (>5KB):
-├── app/templates/index.html      ~12 KB (HTML + CSS + JS)
-├── app/services/embeddings.py    ~6 KB (RAG logic)
-├── PROJECT_SUMMARY.md            ~15 KB (comprehensive docs)
-└── README.md                     ~12 KB (full documentation)
+├── app/templates/index.html ~12 KB (HTML + CSS + JS)
+├── app/services/embeddings.py ~6 KB (RAG logic)
+├── PROJECT_SUMMARY.md ~15 KB (comprehensive docs)
+└── README.md ~12 KB (full documentation)
 
 Medium Files (2-5KB):
-├── app/models/schemas.py         ~3 KB (Pydantic models)
-├── app/services/llm.py           ~4 KB (LLM wrapper)
-├── app/agent/prompts.py          ~4 KB (Prompt templates)
-├── app/agent/agent.py            ~3 KB (Agent logic)
-└── QUICKSTART.md                 ~5 KB (Quick guide)
+├── app/models/schemas.py ~3 KB (Pydantic models)
+├── app/services/llm.py ~4 KB (LLM wrapper)
+├── app/agent/prompts.py ~4 KB (Prompt templates)
+├── app/agent/agent.py ~3 KB (Agent logic)
+└── QUICKSTART.md ~5 KB (Quick guide)
 
 Small Files (<2KB):
-├── app/api/routes.py             ~2 KB (API endpoints)
-├── app/config.py                 ~1 KB (Settings)
-├── app/main.py                   ~2 KB (App entry)
-├── check_setup.py                ~2 KB (Verification)
-├── setup.ps1                     ~2 KB (Setup script)
-├── requirements.txt              <1 KB (Dependencies)
-├── .env.example                  <1 KB (Env template)
-└── All __init__.py files         <1 KB each
+├── app/api/routes.py ~2 KB (API endpoints)
+├── app/config.py ~1 KB (Settings)
+├── app/main.py ~2 KB (App entry)
+├── check_setup.py ~2 KB (Verification)
+├── setup.ps1 ~2 KB (Setup script)
+├── requirements.txt <1 KB (Dependencies)
+├── .env.example <1 KB (Env template)
+└── All __init__.py files <1 KB each
 ```
 
 ---
 
-## 🚀 Quick Navigation
+## Quick Navigation
 
 **To run the app:**
 ```powershell
@@ -272,7 +272,7 @@ Edit: `app/services/embeddings.py` (ANALYSIS_GUIDELINES)
 
 ---
 
-## 📚 Related Reading
+## Related Reading
 
 Each file contains extensive comments explaining:
 - **Why** the code is structured this way
@@ -287,7 +287,7 @@ Look for comments starting with:
 
 ---
 
-## ✅ Checklist: Files You've Read
+## [OK] Checklist: Files You've Read
 
 Track your learning progress:
 
@@ -308,5 +308,5 @@ Track your learning progress:
 
 ---
 
-**Last Updated:** January 7, 2026  
+**Last Updated:** January 7, 2026
 **Project Version:** 1.0.0

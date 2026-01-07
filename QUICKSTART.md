@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## 🚀 Get Started in 5 Minutes
+## Get Started in 5 Minutes
 
 ### Step 1: Activate Virtual Environment
 
@@ -33,9 +33,9 @@ Copy-Item .env.example .env
 ```
 
 2. Get your Gemini API key:
-   - Go to https://makersuite.google.com/app/apikey
-   - Click "Create API Key"
-   - Copy the key
+ - Go to https://makersuite.google.com/app/apikey
+ - Click "Create API Key"
+ - Copy the key
 
 3. Edit `.env` and paste your key:
 ```env
@@ -49,9 +49,9 @@ python check_setup.py
 ```
 
 This will check:
-- ✅ All packages installed
-- ✅ API key configured
-- ✅ Project structure correct
+- [OK] All packages installed
+- [OK] API key configured
+- [OK] Project structure correct
 
 ### Step 5: Run the Application
 
@@ -61,10 +61,10 @@ python -m app.main
 
 You should see:
 ```
-🚀 AI Agent Demo Application Starting...
-📝 Initializing services...
-✅ Application ready!
-INFO:     Uvicorn running on http://0.0.0.0:8000
+AI Agent Demo Application Starting...
+Initializing services...
+Application ready!
+INFO: Uvicorn running on http://0.0.0.0:8000
 ```
 
 ### Step 6: Open in Browser
@@ -73,20 +73,20 @@ Navigate to: **http://localhost:8000**
 
 ---
 
-## 🎯 Try It Out
+## Try It Out
 
 1. **Paste a document** in the text area
 2. **Click "Analyze Document"**
 3. **View the AI analysis** with:
-   - Summary
-   - Completeness status
-   - Missing points (if any)
-   - Evidence from document
-   - Confidence score
+ - Summary
+ - Completeness status
+ - Missing points (if any)
+ - Evidence from document
+ - Confidence score
 
 ---
 
-## 📋 Sample Documents to Test
+## Sample Documents to Test
 
 ### Test 1: Incomplete Document
 ```
@@ -136,7 +136,7 @@ References:
 
 ---
 
-## 🛑 Troubleshooting
+## Troubleshooting
 
 ### "Module not found" errors
 ```powershell
@@ -167,7 +167,7 @@ uvicorn app.main:app --reload --port 8001
 
 ---
 
-## 🎓 Learning Path
+## Learning Path
 
 After getting it running, explore:
 
@@ -178,7 +178,7 @@ After getting it running, explore:
 
 ---
 
-## 🔄 Making Changes
+## Making Changes
 
 The app runs with auto-reload enabled. Edit any `.py` file and the server will automatically restart.
 
@@ -189,7 +189,7 @@ Try modifying:
 
 ---
 
-## 📚 Next Steps
+## Next Steps
 
 - Add more analysis types (sentiment, readability, etc.)
 - Implement tool calling with LangChain

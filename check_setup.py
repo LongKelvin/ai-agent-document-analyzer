@@ -9,7 +9,7 @@ import sys
 
 def check_imports():
     """Check if all required packages are installed."""
-    print("🔍 Checking required packages...")
+    print("Checking required packages...")
     
     packages = [
         ("fastapi", "FastAPI"),
@@ -25,23 +25,23 @@ def check_imports():
     for package, name in packages:
         try:
             __import__(package)
-            print(f"  ✅ {name}")
+            print(f"  [OK] {name}")
         except ImportError:
-            print(f"  ❌ {name} - MISSING")
+            print(f"  [FAIL] {name} - MISSING")
             missing.append(name)
     
     if missing:
-        print(f"\n❌ Missing packages: {', '.join(missing)}")
+        print(f"\n[FAIL] Missing packages: {', '.join(missing)}")
         print("   Run: pip install -r requirements.txt")
         return False
     
-    print("\n✅ All packages installed!")
+    print("\n[OK] All packages installed!")
     return True
 
 
 def check_env():
     """Check if .env file exists and has required variables."""
-    print("\n🔍 Checking environment configuration...")
+    print("\nChecking environment configuration...")
     
     try:
         from dotenv import load_dotenv
@@ -51,25 +51,25 @@ def check_env():
         
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key or api_key == "your_api_key_here":
-            print("  ❌ GEMINI_API_KEY not configured")
+            print("  [FAIL] GEMINI_API_KEY not configured")
             print("     1. Copy .env.example to .env")
             print("     2. Add your Gemini API key")
             print("     3. Get key from: https://makersuite.google.com/app/apikey")
             return False
         
-        print("  ✅ GEMINI_API_KEY configured")
+        print("  [OK] GEMINI_API_KEY configured")
         print(f"     Key starts with: {api_key[:8]}...")
         return True
         
     except FileNotFoundError:
-        print("  ❌ .env file not found")
+        print("  [FAIL] .env file not found")
         print("     Copy .env.example to .env")
         return False
 
 
 def check_structure():
     """Check if directory structure is correct."""
-    print("\n🔍 Checking project structure...")
+    print("\nChecking project structure...")
     
     import os
     
@@ -88,23 +88,23 @@ def check_structure():
     missing = []
     for path in required_paths:
         if os.path.exists(path):
-            print(f"  ✅ {path}")
+            print(f"  [OK] {path}")
         else:
-            print(f"  ❌ {path} - MISSING")
+            print(f"  [FAIL] {path} - MISSING")
             missing.append(path)
     
     if missing:
-        print(f"\n❌ Missing files: {len(missing)}")
+        print(f"\n[FAIL] Missing files: {len(missing)}")
         return False
     
-    print("\n✅ Project structure correct!")
+    print("\n[OK] Project structure correct!")
     return True
 
 
 def main():
     """Run all checks."""
     print("=" * 60)
-    print("🚀 AI Agent Demo - Installation Verification")
+    print("AI Agent Demo - Installation Verification")
     print("=" * 60)
     print()
     
@@ -116,14 +116,14 @@ def main():
     
     print("\n" + "=" * 60)
     if all(checks):
-        print("✅ ALL CHECKS PASSED!")
+        print("[OK] ALL CHECKS PASSED!")
         print("\nYou're ready to run the application:")
         print("  python -m app.main")
         print("\nOr:")
         print("  uvicorn app.main:app --reload")
         print("\nThen open: http://localhost:8000")
     else:
-        print("❌ SOME CHECKS FAILED")
+        print("[FAIL] SOME CHECKS FAILED")
         print("\nPlease fix the issues above before running the application.")
     print("=" * 60)
     

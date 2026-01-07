@@ -45,13 +45,13 @@ async def startup_event():
     - Load ML models (handled lazily in singletons)
     - Set up logging
     """
-    print("🚀 AI Agent Demo Application Starting...")
-    print("📝 Initializing services...")
+    print("AI Agent Demo Application Starting...")
+    print("Initializing services...")
     
     # Services are initialized lazily on first use
     # This keeps startup fast
     
-    print("✅ Application ready!")
+    print("Application ready!")
 
 
 @app.on_event("shutdown")
@@ -61,7 +61,7 @@ async def shutdown_event():
     
     Clean up resources if needed.
     """
-    print("👋 Shutting down AI Agent Demo Application...")
+    print("Shutting down AI Agent Demo Application...")
 
 
 if __name__ == "__main__":

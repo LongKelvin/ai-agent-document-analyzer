@@ -1,8 +1,8 @@
-# 🤖 AI Agent Document Analysis Demo
+# AI Agent Document Analysis Demo
 
 An educational demonstration of building an AI Agent using Python, FastAPI, LangChain, Google Gemini AI, and RAG (Retrieval-Augmented Generation).
 
-## 🎯 Learning Objectives
+## Learning Objectives
 
 This project demonstrates:
 - **AI Agent Architecture**: Building agents that treat LLMs as untrusted components
@@ -12,7 +12,7 @@ This project demonstrates:
 - **Evidence-Based AI**: No hallucination, only facts from source documents
 - **Clean Architecture**: Separation of concerns with clear module boundaries
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 app/
@@ -36,7 +36,7 @@ app/
     └── index.html         # Simple UI
 ```
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Prerequisites
 
@@ -108,7 +108,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Navigate to: [http://localhost:8000](http://localhost:8000)
 
-## 📚 How It Works
+## How It Works
 
 ### 1. User Submits Document
 User pastes text into the web interface and clicks "Analyze"
@@ -142,7 +142,7 @@ User pastes text into the web interface and clicks "Analyze"
 - Evidence quotes from document
 - Confidence score
 
-## 🎓 Key Concepts Demonstrated
+## Key Concepts Demonstrated
 
 ### 1. Treating LLM as Untrusted
 
@@ -185,7 +185,7 @@ The agent is instructed to:
 - Say "unknown" when uncertain
 - Use confidence scores to reflect certainty
 
-## 🛠️ API Endpoints
+## API Endpoints
 
 ### `GET /`
 Serves the HTML frontend
@@ -227,7 +227,7 @@ Analyzes a document
 ### `GET /health`
 Health check endpoint
 
-## 🔧 Configuration
+## Configuration
 
 All configuration is managed through environment variables:
 
@@ -238,7 +238,7 @@ All configuration is managed through environment variables:
 | `TEMPERATURE` | LLM temperature (0.0-2.0) | `0.1` |
 | `EMBEDDING_MODEL_NAME` | Sentence transformer model | `all-MiniLM-L6-v2` |
 
-## 🧪 Testing the Application
+## Testing the Application
 
 Try these sample documents:
 
@@ -285,7 +285,7 @@ References:
 
 **Expected:** Status = "complete", High confidence
 
-## 📖 Educational Notes
+## Educational Notes
 
 ### Why Low Temperature (0.1)?
 - More deterministic output
@@ -313,7 +313,7 @@ References:
 - Add comprehensive error logging
 - Implement retry logic for API calls
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Import Errors
 If you see import errors like "Import 'fastapi' could not be resolved":
@@ -331,19 +331,19 @@ If you see "Gemini API error":
 First run may take time to download sentence-transformer model (~80MB).
 Wait for download to complete.
 
-## 📝 License
+## License
 
 This is educational code. Use freely for learning purposes.
 
-## 🤝 Contributing
+## Contributing
 
 This is a demo project for learning. Feel free to fork and experiment!
 
-## 📧 Questions?
+## Questions?
 
 This project demonstrates AI Agent principles for educational purposes.
 Explore the code, modify it, and learn by doing!
 
 ---
 
-**Happy Learning! 🚀**
+**Happy Learning!**

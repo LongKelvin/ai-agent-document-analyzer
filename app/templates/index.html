@@ -252,7 +252,7 @@
 </head>
 <body>
     <header>
-        <h1>🤖 AI Agent Document Analysis Demo</h1>
+        <h1>AI Agent Document Analysis Demo</h1>
         <p class="subtitle">Educational demo using FastAPI, Gemini AI, LangChain, and RAG</p>
     </header>
     
@@ -269,7 +269,7 @@
     
     <div class="container">
         <div class="panel">
-            <h2>📄 Input Document</h2>
+            <h2>Input Document</h2>
             <form id="analysisForm">
                 <label for="documentText">Paste your document text below:</label>
                 <textarea 
@@ -290,12 +290,12 @@ Features:
 We believe this will significantly improve productivity."
                     required
                 ></textarea>
-                <button type="submit" id="analyzeBtn">🔍 Analyze Document</button>
+                <button type="submit" id="analyzeBtn">Analyze Document</button>
             </form>
         </div>
         
         <div class="panel">
-            <h2>📊 Analysis Result</h2>
+            <h2>Analysis Result</h2>
             <div id="result">
                 <div class="loading" style="display: none;" id="loading">
                     <div class="spinner"></div>
@@ -371,13 +371,13 @@ We believe this will significantly improve productivity."
             
             let html = `
                 <div class="result-section">
-                    <h3>📝 Summary</h3>
+                    <h3>Summary</h3>
                     <p>${escapeHtml(result.summary)}</p>
                 </div>
                 
                 <div class="result-section">
                     <h3>
-                        ✅ Completeness Status
+                        Completeness Status
                         <span class="status-badge ${statusClass}">
                             ${result.completeness_status.toUpperCase()}
                         </span>
@@ -388,7 +388,7 @@ We believe this will significantly improve productivity."
             if (result.missing_points && result.missing_points.length > 0) {
                 html += `
                     <div class="result-section">
-                        <h3>⚠️ Missing Points</h3>
+                        <h3>Missing Points</h3>
                         <ul>
                             ${result.missing_points.map(point => `<li>${escapeHtml(point)}</li>`).join('')}
                         </ul>
@@ -399,7 +399,7 @@ We believe this will significantly improve productivity."
             if (result.evidence && result.evidence.length > 0) {
                 html += `
                     <div class="result-section">
-                        <h3>🔍 Evidence</h3>
+                        <h3>Evidence</h3>
                         ${result.evidence.map(ev => `<blockquote>${escapeHtml(ev)}</blockquote>`).join('')}
                     </div>
                 `;
@@ -407,7 +407,7 @@ We believe this will significantly improve productivity."
             
             html += `
                 <div class="result-section">
-                    <h3>🎯 Confidence Score</h3>
+                    <h3>Confidence Score</h3>
                     <div class="confidence-bar">
                         <div class="confidence-fill" style="width: ${confidencePercent}%">
                             ${confidencePercent}%
@@ -423,7 +423,7 @@ We believe this will significantly improve productivity."
         function displayError(errorMessage) {
             resultDiv.innerHTML = `
                 <div class="error">
-                    <h3>❌ Error</h3>
+                    <h3>Error</h3>
                     <p>${escapeHtml(errorMessage)}</p>
                 </div>
             `;
