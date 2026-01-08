@@ -4,8 +4,13 @@ Configuration management using Pydantic Settings.
 Centralizes all environment variables and configuration.
 """
 
+import os
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
+# Disable ChromaDB telemetry globally before any imports
+os.environ['ANONYMIZED_TELEMETRY'] = 'False'
+os.environ['CHROMA_TELEMETRY'] = 'False'
 
 
 class Settings(BaseSettings):

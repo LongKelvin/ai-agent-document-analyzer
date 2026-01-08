@@ -8,7 +8,7 @@ This module defines the strict data contracts between:
 Key principle: Treat LLM output as untrusted until validated.
 """
 
-from typing import Literal, List
+from typing import Literal, List, Optional, Dict
 from pydantic import BaseModel, Field, validator
 
 
@@ -89,3 +89,52 @@ class AnalyzeResponse(BaseModel):
         if values.get('success') and v is None:
             raise ValueError("Result must be provided when success is True")
         return v
+
+
+# New schemas for document upload and Q&A
+
+class DocumentUploadResponse(BaseModel):
+    """Response for document upload."""
+    success: bool
+    document_id: str | None = None
+    filename: str | None = None
+    message: str
+    error: str | None = None
+
+
+class DocumentInfo(BaseModel):
+    """Information about a stored document."""
+    document_id: str
+    filename: str
+    upload_date: str
+    file_size: int
+
+
+class DocumentListResponse(BaseModel):
+    """Response for listing documents."""
+    success: bool
+    documents: List[DocumentInfo] = Field(default_factory=list)
+    total_count: int = 0
+    error: str | None = None
+
+
+class QuestionRequest(BaseModel):
+    """Request for asking a question about documents."""
+    question: str = Field(
+        ...,
+        description="Question to ask about the documents",
+        min_length=3,
+        max_length=500
+    )
+    document_id: Optional[str] = Field(
+        None,
+        description="Optional: Ask about specific document only"
+    )
+
+
+class QuestionResponse(BaseModel):
+    """Response for Q&A endpoint."""
+    success: bool
+    answer: str | None = None
+    sources: List[Dict[str, str]] = Field(default_factory=list)
+    error: str | None = None

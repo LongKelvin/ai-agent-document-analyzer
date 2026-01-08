@@ -8,18 +8,75 @@ This is the main file that:
 - Starts the server
 """
 
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.api import router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage application lifespan events.
+    
+    Replaces deprecated @app.on_event decorators.
+    """
+    # Startup
+    print("AI Agent Demo Application Starting...")
+    print("Initializing services...")
+    print("Application ready!")
+    
+    yield
+    
+    # Shutdown
+    print("Shutting down AI Agent Demo Application...")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Manage application lifespan events.
+    
+    Replaces deprecated @app.on_event decorators.
+    """
+    # Startup
+    print("AI Agent Demo Application Starting...")
+    print("Initializing services...")
+    print("Application ready!")
+    
+    yield
+    
+    # Shutdown
+    print("Shutting down AI Agent Demo Application...")
+
 
 # Create FastAPI application
 app = FastAPI(
     title="AI Agent Document Analysis Demo",
     description="Educational demo showing AI Agent principles with Gemini, LangChain, and RAG",
     version="1.0.0",
+    lifespan=lifespan
 )
+
+# Add exception handler for validation errors
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Log and return detailed validation errors."""
+    print(f"[ERROR] Validation failed for {request.url}")
+    print(f"[ERROR] Details: {exc.errors()}")
+    print(f"[ERROR] Body: {exc.body}")
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "result": None,
+            "error": f"Validation error: {exc.errors()}"
+        }
+    )
 
 # Configure CORS (for development)
 # In production, specify allowed origins explicitly
@@ -35,44 +92,15 @@ app.add_middleware(
 app.include_router(router)
 
 
-@app.on_event("startup")
-async def startup_event():
-    """
-    Run on application startup.
-    
-    This is where we can:
-    - Initialize database connections (not needed for demo)
-    - Load ML models (handled lazily in singletons)
-    - Set up logging
-    """
-    print("AI Agent Demo Application Starting...")
-    print("Initializing services...")
-    
-    # Services are initialized lazily on first use
-    # This keeps startup fast
-    
-    print("Application ready!")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Run on application shutdown.
-    
-    Clean up resources if needed.
-    """
-    print("Shutting down AI Agent Demo Application...")
-
-
 if __name__ == "__main__":
     import uvicorn
     
     # Run the application
-    # For development: auto-reload on code changes
+    # Note: reload=False to avoid Windows multiprocessing issues with torch/sentence-transformers
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Auto-reload for development
+        reload=False,  # Disabled for Windows compatibility
         log_level="info"
     )

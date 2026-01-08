@@ -15,9 +15,15 @@ pydantic-settings==2.7.0
 # Embeddings and Vector Operations
 sentence-transformers==3.3.1
 numpy==2.2.1
+chromadb==0.4.22
+langchain-community==0.3.13
 
 # Environment Management
 python-dotenv==1.0.1
+
+# File handling
+aiofiles==24.1.0
+python-magic-bin==0.4.14
 
 # Templating
 jinja2==3.1.5
