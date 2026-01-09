@@ -6,20 +6,31 @@ This is an **educational AI Agent demo** showcasing clean architecture patterns 
 
 **Core Philosophy**: Treat LLM outputs as untrusted - all responses are validated with Pydantic schemas before use.
 
+**Two Implementations Available**:
+1. **Custom Implementation** (`llm.py`, `vector_db.py`, `qa_agent.py`) - Educational, shows fundamentals
+2. **LangChain Implementation** (`*_langchain.py` files) - Production-ready, industry standard
+
+See `LANGCHAIN_EXPLAINED.md` and `LANGCHAIN_COMPARISON.md` for detailed comparison.
+
 ### Component Structure
 ```
 app/
-├── main.py              # FastAPI entry point with startup/shutdown hooks
+├── main.py              # FastAPI entry point with lifespan context manager
 ├── config.py            # Pydantic Settings (singleton pattern)
-├── api/routes.py        # REST endpoints: GET /, POST /analyze, GET /health
+├── api/routes.py        # REST endpoints: GET /, POST /analyze, POST /upload, POST /ask
 ├── agent/
-│   ├── agent.py         # DocumentAnalysisAgent orchestrates the full pipeline
+│   ├── agent.py         # DocumentAnalysisAgent (custom implementation)
+│   ├── qa_agent.py      # QAAgent (custom implementation)
+│   ├── qa_agent_langchain.py  # QAAgent using LangChain chains (NEW)
 │   └── prompts.py       # Prompt templates (system + user prompts)
 ├── services/
-│   ├── llm.py           # GeminiService singleton wraps google-generativeai
-│   └── embeddings.py    # EmbeddingService with in-memory RAG (no vector DB)
+│   ├── llm.py           # GeminiService (custom implementation)
+│   ├── llm_langchain.py # LangChain LLM wrapper (NEW)
+│   ├── embeddings.py    # EmbeddingService with in-memory RAG
+│   ├── vector_db.py     # VectorDBService with ChromaDB (custom)
+│   └── vector_db_langchain.py  # LangChain Chroma wrapper (NEW)
 ├── models/schemas.py    # Pydantic models for validation
-└── templates/index.html # Simple web UI
+└── templates/           # Web UI (index.html, advanced.html)
 ```
 
 ## Critical Patterns
@@ -37,10 +48,28 @@ def get_gemini_service() -> GeminiService:
 ```
 Never instantiate services directly - always use `get_*_service()` functions.
 
-### 2. RAG with In-Memory Vectors
-`app/services/embeddings.py` contains hardcoded `ANALYSIS_GUIDELINES` list that gets embedded at startup using `sentence-transformers`. Semantic search uses cosine similarity - no external vector DB required.
+### 2. RAG with In-Memory Vectors AND Persistent Vector DB
+- **In-Memory**: `app/services/embeddings.py` contains hardcoded `ANALYSIS_GUIDELINES` for document analysis
+- **Persistent**: `app/services/vector_db.py` or `app/services/vector_db_langchain.py` stores user-uploaded documents in ChromaDB
 
-### 3. Structured LLM Outputs
+### 3. LangChain Integration (New)
+The project now includes LangChain implementations alongside custom code:
+
+**Custom vs LangChain:**
+- `llm.py` (custom) vs `llm_langchain.py` (LangChain wrapper for Gemini)
+- `vector_db.py` (custom) vs `vector_db_langchain.py` (LangChain Chroma wrapper)
+- `qa_agent.py` (custom) vs `qa_agent_langchain.py` (LangChain chains with LCEL)
+
+**Key LangChain Concepts:**
+- **LCEL (LangChain Expression Language)**: Chain components with `|` operator
+- **Retrievers**: Standardized interface for fetching relevant documents
+- **Chains**: Pre-built (RetrievalQA) and custom (LCEL) pipelines
+- **Prompt Templates**: Structured prompts (system + user messages)
+- **Output Parsers**: Automatic JSON/text extraction
+
+See `LANGCHAIN_EXPLAINED.md` for detailed guide.
+
+### 4. Structured LLM Outputs
 Agent workflow in `app/agent/agent.py`:
 1. Retrieve guidelines via `embedding_service.retrieve_relevant_guidelines()`
 2. Build prompt with `build_complete_prompt()` from `app/agent/prompts.py`
@@ -50,7 +79,7 @@ Agent workflow in `app/agent/agent.py`:
 
 **Never trust raw LLM output** - always validate with Pydantic first.
 
-### 4. Environment Configuration
+### 5. Environment Configuration
 All config via `.env` file loaded by `app/config.py`. Key variables:
 - `GEMINI_API_KEY` (required)
 - `GEMINI_MODEL_NAME` (default: gemini-pro, supports gemini-2.0-flash, gemini-2.5-flash)

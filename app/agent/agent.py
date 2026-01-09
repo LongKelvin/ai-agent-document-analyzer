@@ -14,9 +14,11 @@ from typing import Dict, Any
 from pydantic import ValidationError
 
 from app.models.schemas import AnalysisResult
-from app.services.llm import get_gemini_service
+from app.services.llm_langchain import get_langchain_llm_service as get_gemini_service
 from app.services.embeddings import get_embedding_service
 from app.agent.prompts import build_complete_prompt
+
+
 
 
 class DocumentAnalysisAgent:
