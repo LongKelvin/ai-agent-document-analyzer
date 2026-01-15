@@ -43,6 +43,9 @@ class QAAgent:
             Dict with 'answer' and 'sources' keys
         """
         # Step 1: Retrieve relevant context
+        print(f"    → Sub-step 2.1: Retrieving relevant context from Vector DB...")
+        print(f"      • Query: {question[:60]}...")
+        print(f"      • Top K: {top_k}")
         search_results = self.vector_db.search(
             query=question,
             top_k=top_k,
@@ -50,12 +53,17 @@ class QAAgent:
         )
         
         if not search_results:
+            print(f"      ⚠ No documents found in database")
             return {
                 "answer": "I don't have any documents to answer this question. Please upload documents first.",
                 "sources": []
             }
         
+        print(f"      • Found {len(search_results)} relevant chunks")
+        print(f"      ✓ Context retrieved")
+        
         # Step 2: Build context from search results
+        print(f"    → Sub-step 2.2: Assembling context from search results...")
         context_parts = []
         sources = []
         
@@ -69,19 +77,28 @@ class QAAgent:
             })
         
         context = "\n\n".join(context_parts)
+        print(f"      • Total context: {len(context)} characters")
+        print(f"      ✓ Context assembled")
         
         # Step 3: Build prompt
+        print(f"    → Sub-step 2.3: Building Q&A prompt...")
         prompt = self._build_qa_prompt(question, context)
+        print(f"      • Prompt length: {len(prompt)} characters")
+        print(f"      ✓ Prompt ready")
         
         # Step 4: Get LLM response
+        print(f"    → Sub-step 2.4: Calling LLM for answer...")
         try:
             answer = self.llm_service.generate_response(prompt)
+            print(f"      • Answer length: {len(answer)} characters")
+            print(f"      ✓ LLM response received")
             
             return {
                 "answer": answer.strip(),
                 "sources": sources
             }
         except Exception as e:
+            print(f"      LLM call failed: {str(e)}")
             raise ValueError(f"Failed to generate answer: {str(e)}")
     
     def _build_qa_prompt(self, question: str, context: str) -> str:

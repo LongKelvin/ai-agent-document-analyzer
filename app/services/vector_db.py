@@ -69,11 +69,15 @@ class VectorDBService:
             text: Full text content of the document
             metadata: Additional metadata (filename, upload_date, etc.)
         """
+        print(f"      → Chunking document...")
         # Split document into chunks for better retrieval
         chunks = self._chunk_text(text)
+        print(f"        • Created {len(chunks)} chunks")
         
+        print(f"      → Generating embeddings with sentence-transformers...")
         # Generate embeddings for each chunk
         embeddings = self.embedding_model.encode(chunks).tolist()
+        print(f"        • Generated {len(embeddings)} embeddings")
         
         # Create unique IDs for each chunk
         chunk_ids = [f"{document_id}_chunk_{i}" for i in range(len(chunks))]
@@ -89,6 +93,7 @@ class VectorDBService:
             for i in range(len(chunks))
         ]
         
+        print(f"      → Storing in ChromaDB...")
         # Add to ChromaDB
         self.collection.add(
             ids=chunk_ids,
@@ -97,7 +102,8 @@ class VectorDBService:
             metadatas=chunk_metadata
         )
         
-        print(f"[VectorDB] Added document {document_id} with {len(chunks)} chunks")
+        print(f"        • Total documents in DB: {self.collection.count()}")
+        print(f"      ✓ Document stored successfully")
     
     def search(self, query: str, top_k: int = 5, document_id: str = None) -> List[Dict[str, Any]]:
         """
@@ -111,12 +117,14 @@ class VectorDBService:
         Returns:
             List of search results with text, metadata, and similarity scores
         """
+        print(f"        • Encoding query with embedding model...")
         # Generate query embedding
         query_embedding = self.embedding_model.encode([query])[0].tolist()
         
         # Build filter if document_id provided
         where_filter = {"document_id": document_id} if document_id else None
         
+        print(f"        • Searching ChromaDB (top_k={top_k})...")
         # Search ChromaDB
         results = self.collection.query(
             query_embeddings=[query_embedding],
@@ -134,6 +142,7 @@ class VectorDBService:
                     "distance": results['distances'][0][i] if 'distances' in results else None
                 })
         
+        print(f"        • Found {len(formatted_results)} results")
         return formatted_results
     
     def list_documents(self) -> List[Dict[str, Any]]:

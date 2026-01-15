@@ -107,7 +107,7 @@ class GeminiService:
         except json.JSONDecodeError as e:
             raise ValueError(f"Failed to parse JSON from LLM response: {str(e)}\nResponse: {response_text[:200]}...")
     
-    def generate_structured_response(self, prompt: str) -> Dict[str, Any]:
+    def generate_structured_response(self, prompt: str, request_id: str = "llm") -> Dict[str, Any]:
         """
         Generate response and extract JSON in one call.
         
@@ -115,12 +115,18 @@ class GeminiService:
         
         Args:
             prompt: The complete prompt
+            request_id: Request ID for tracing
             
         Returns:
             Parsed JSON dictionary
         """
+        print(f"[{request_id}]   → Sub-step 3.1: Sending request to Gemini API...")
         raw_response = self.generate_response(prompt)
-        return self.extract_json_from_response(raw_response)
+        print(f"[{request_id}]     • Response length: {len(raw_response)} characters")
+        print(f"[{request_id}]   → Sub-step 3.2: Extracting JSON from response...")
+        json_response = self.extract_json_from_response(raw_response)
+        print(f"[{request_id}]     • Found {len(json_response)} JSON fields")
+        return json_response
 
 
 # Singleton instance for reuse across requests

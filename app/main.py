@@ -26,32 +26,23 @@ async def lifespan(app: FastAPI):
     Replaces deprecated @app.on_event decorators.
     """
     # Startup
-    print("AI Agent Demo Application Starting...")
-    print("Initializing services...")
-    print("Application ready!")
+    print("\n" + "="*70)
+    print("🚀 AI AGENT DEMO APPLICATION STARTING")
+    print("="*70)
+    print("\n[STARTUP] Step 1/3: Loading configuration...")
+    print("[STARTUP] Step 2/3: Initializing AI services (LLM, Embeddings, Vector DB)...")
+    print("[STARTUP] Step 3/3: Registering API routes...")
+    print("\n✅ APPLICATION READY!")
+    print("📍 Server URL: http://localhost:8000")
+    print("📚 API Docs: http://localhost:8000/docs")
+    print("="*70 + "\n")
     
     yield
     
     # Shutdown
-    print("Shutting down AI Agent Demo Application...")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """
-    Manage application lifespan events.
-    
-    Replaces deprecated @app.on_event decorators.
-    """
-    # Startup
-    print("AI Agent Demo Application Starting...")
-    print("Initializing services...")
-    print("Application ready!")
-    
-    yield
-    
-    # Shutdown
-    print("Shutting down AI Agent Demo Application...")
+    print("\n" + "="*70)
+    print("🛑 SHUTTING DOWN AI AGENT DEMO APPLICATION")
+    print("="*70 + "\n")
 
 
 # Create FastAPI application

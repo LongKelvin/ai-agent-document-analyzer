@@ -73,18 +73,30 @@ async def analyze_document(request: AnalyzeRequest):
     - 422: Validation error from Pydantic
     - 500: LLM API error or other internal error
     """
+    request_id = str(uuid.uuid4())[:8]
     try:
-        # Log incoming request for debugging
-        print(f"[DEBUG] Received request with document length: {len(request.document_text)}")
+        print(f"\n{'='*70}")
+        print(f"[ANALYZE REQUEST {request_id}] NEW DOCUMENT ANALYSIS")
+        print(f"{'='*70}")
+        print(f"[{request_id}] Document length: {len(request.document_text)} characters")
+        print(f"[{request_id}] Document preview: {request.document_text[:100]}...")
         
         # Get agent instance
+        print(f"[{request_id}] Step 1/5: Initializing AI Agent...")
         agent = get_document_analysis_agent()
+        print(f"[{request_id}] ✓ Agent initialized")
         
         # Perform analysis
         # This may raise ValidationError if LLM output is invalid
-        result = agent.analyze_document(request.document_text)
+        print(f"[{request_id}] Step 2/5: Starting document analysis pipeline...")
+        result = agent.analyze_document(request.document_text, request_id)
+        print(f"[{request_id}] ✓ Analysis complete")
         
         # Return success response
+        print(f"[{request_id}] Step 5/5: Preparing response...")
+        print(f"[{request_id}] Results: {result.completeness_status.upper()} | Confidence: {result.confidence:.2f}")
+        print(f"[{request_id}] REQUEST COMPLETED SUCCESSFULLY")
+        print(f"{'='*70}\n")
         return AnalyzeResponse(
             success=True,
             result=result,
@@ -94,6 +106,9 @@ async def analyze_document(request: AnalyzeRequest):
     except ValidationError as e:
         # LLM output didn't match schema
         # This shouldn't happen often if prompts are well-designed
+        print(f"[{request_id}] VALIDATION ERROR: LLM output doesn't match schema")
+        print(f"[{request_id}] Error details: {str(e)}")
+        print(f"{'='*70}\n")
         error_message = f"AI output validation failed: {str(e)}"
         return AnalyzeResponse(
             success=False,
@@ -103,6 +118,9 @@ async def analyze_document(request: AnalyzeRequest):
     
     except ValueError as e:
         # JSON parsing error from LLM response
+        print(f"[{request_id}] JSON PARSING ERROR")
+        print(f"[{request_id}] Error details: {str(e)}")
+        print(f"{'='*70}\n")
         error_message = f"Failed to parse AI response: {str(e)}"
         return AnalyzeResponse(
             success=False,
@@ -112,6 +130,9 @@ async def analyze_document(request: AnalyzeRequest):
     
     except Exception as e:
         # Catch-all for other errors (LLM API, etc.)
+        print(f"[{request_id}] UNEXPECTED ERROR: {type(e).__name__}")
+        print(f"[{request_id}] Error details: {str(e)}")
+        print(f"{'='*70}\n")
         error_message = f"Analysis failed: {str(e)}"
         return AnalyzeResponse(
             success=False,
@@ -142,15 +163,26 @@ async def upload_document(file: UploadFile = File(...)):
     
     Supports: .txt, .md, .pdf (text-based)
     """
+    upload_id = str(uuid.uuid4())[:8]
     try:
+        print(f"\n{'='*70}")
+        print(f"[UPLOAD {upload_id}] NEW DOCUMENT UPLOAD")
+        print(f"{'='*70}")
+        print(f"[{upload_id}] Filename: {file.filename}")
+        
         # Generate unique document ID
         document_id = str(uuid.uuid4())
+        print(f"[{upload_id}] Assigned document ID: {document_id[:12]}...")
         
         # Read file content
+        print(f"[{upload_id}] Step 1/4: Reading file content...")
         content = await file.read()
         text = content.decode('utf-8')
+        print(f"[{upload_id}] ✓ File read complete - {len(text)} characters")
         
         if len(text) < 50:
+            print(f"[{upload_id}] Document too short: {len(text)} < 50 characters")
+            print(f"{'='*70}\n")
             return DocumentUploadResponse(
                 success=False,
                 message="Document too short (minimum 50 characters)",
@@ -158,9 +190,12 @@ async def upload_document(file: UploadFile = File(...)):
             )
         
         # Get vector DB service
+        print(f"[{upload_id}] Step 2/4: Initializing Vector DB service...")
         vector_db = get_vector_db_service()
+        print(f"[{upload_id}] ✓ Vector DB ready")
         
         # Add document with metadata
+        print(f"[{upload_id}] Step 3/4: Generating embeddings and storing in Vector DB...")
         metadata = {
             "filename": file.filename,
             "upload_date": datetime.now().isoformat(),
@@ -168,6 +203,11 @@ async def upload_document(file: UploadFile = File(...)):
         }
         
         vector_db.add_document(document_id, text, metadata)
+        print(f"[{upload_id}] ✓ Document stored in vector database")
+        
+        print(f"[{upload_id}] Step 4/4: Upload complete!")
+        print(f"[{upload_id}] DOCUMENT UPLOADED SUCCESSFULLY")
+        print(f"{'='*70}\n")
         
         return DocumentUploadResponse(
             success=True,
@@ -177,12 +217,17 @@ async def upload_document(file: UploadFile = File(...)):
         )
     
     except UnicodeDecodeError:
+        print(f"[{upload_id}] ENCODING ERROR: File not in UTF-8 format")
+        print(f"{'='*70}\n")
         return DocumentUploadResponse(
             success=False,
             message="Failed to read file",
             error="File must be in UTF-8 text format"
         )
     except Exception as e:
+        print(f"[{upload_id}] UPLOAD FAILED: {type(e).__name__}")
+        print(f"[{upload_id}] Error details: {str(e)}")
+        print(f"{'='*70}\n")
         return DocumentUploadResponse(
             success=False,
             message="Upload failed",
@@ -231,15 +276,34 @@ async def ask_question(request: QuestionRequest):
     
     Uses RAG to retrieve relevant context and generate answer.
     """
+    question_id = str(uuid.uuid4())[:8]
     try:
+        print(f"\n{'='*70}")
+        print(f"❓ [Q&A {question_id}] NEW QUESTION")
+        print(f"{'='*70}")
+        print(f"[{question_id}] Question: {request.question}")
+        if request.document_id:
+            print(f"[{question_id}] Target document: {request.document_id[:12]}...")
+        else:
+            print(f"[{question_id}] Searching all documents")
+        
         # Get Q&A agent
+        print(f"[{question_id}] Step 1/3: Initializing Q&A Agent...")
         qa_agent = get_qa_agent()
+        print(f"[{question_id}] ✓ Agent ready")
         
         # Get answer
+        print(f"[{question_id}] Step 2/3: Processing question with RAG pipeline...")
         result = qa_agent.answer_question(
             question=request.question,
             document_id=request.document_id
         )
+        print(f"[{question_id}] ✓ Answer generated")
+        
+        print(f"[{question_id}] Step 3/3: Preparing response...")
+        print(f"[{question_id}] Sources: {len(result['sources'])} document chunks")
+        print(f"[{question_id}] QUESTION ANSWERED SUCCESSFULLY")
+        print(f"{'='*70}\n")
         
         return QuestionResponse(
             success=True,
@@ -248,11 +312,16 @@ async def ask_question(request: QuestionRequest):
         )
     
     except ValueError as e:
+        print(f"[{question_id}] VALIDATION ERROR: {str(e)}")
+        print(f"{'='*70}\n")
         return QuestionResponse(
             success=False,
             error=str(e)
         )
     except Exception as e:
+        print(f"[{question_id}] ERROR: {type(e).__name__}")
+        print(f"[{question_id}] Error details: {str(e)}")
+        print(f"{'='*70}\n")
         return QuestionResponse(
             success=False,
             error=f"Failed to answer question: {str(e)}"

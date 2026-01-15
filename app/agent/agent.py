@@ -39,7 +39,7 @@ class DocumentAnalysisAgent:
         self.llm_service = get_gemini_service()
         self.embedding_service = get_embedding_service()
     
-    def analyze_document(self, document_text: str) -> AnalysisResult:
+    def analyze_document(self, document_text: str, request_id: str = "agent") -> AnalysisResult:
         """
         Analyze a document for completeness and clarity.
         
@@ -52,6 +52,7 @@ class DocumentAnalysisAgent:
         
         Args:
             document_text: The document to analyze
+            request_id: Request ID for tracing
             
         Returns:
             Validated AnalysisResult
@@ -63,21 +64,32 @@ class DocumentAnalysisAgent:
         """
         # Step 1: RAG - Retrieve relevant guidelines
         # This is semantic search using embeddings
+        print(f"[{request_id}]   → Sub-step 2.1: RAG Retrieval (Semantic Search)...")
+        print(f"[{request_id}]     • Encoding document text with sentence-transformers...")
         relevant_guidelines = self.embedding_service.retrieve_relevant_guidelines(
             query=document_text,
             top_k=2  # Get 2 most relevant guidelines
         )
+        print(f"[{request_id}]     • Found {len(relevant_guidelines)} relevant guidelines")
+        print(f"[{request_id}]     ✓ RAG retrieval complete")
         
         # Step 2: Build complete prompt
         # Inject retrieved context and document into prompt template
+        print(f"[{request_id}]   → Sub-step 2.2: Building prompt with RAG context...")
         prompt = build_complete_prompt(
             document_text=document_text,
             retrieved_guidelines=relevant_guidelines
         )
+        print(f"[{request_id}]     • Prompt length: {len(prompt)} characters")
+        print(f"[{request_id}]     ✓ Prompt constructed")
         
         # Step 3: Get LLM response
         # LLM is instructed to return JSON only
-        response_json = self.llm_service.generate_structured_response(prompt)
+        print(f"[{request_id}] Step 3/5: Calling Google Gemini LLM API...")
+        print(f"[{request_id}]   • Model: Gemini Pro")
+        print(f"[{request_id}]   • Waiting for LLM response...")
+        response_json = self.llm_service.generate_structured_response(prompt, request_id)
+        print(f"[{request_id}]   ✓ LLM response received")
         
         # Step 4: Validate output with Pydantic
         # This is where we treat LLM output as untrusted
