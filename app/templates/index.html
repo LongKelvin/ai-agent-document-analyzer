@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Agent Document Analysis Demo</title>
+    <title>Document Analysis Demo</title>
     <style>
         * {
             margin: 0;
@@ -12,113 +12,156 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             line-height: 1.6;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #f5f5f5;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            opacity: 0.9;
-            font-size: 1.1em;
+            background: #fafafa;
+            color: #1a1a1a;
+            padding: 40px 20px;
         }
         
         .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
-        @media (max-width: 768px) {
-            .container {
+        header {
+            margin-bottom: 48px;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 15px;
+        }
+        
+        .info-box {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+            margin-bottom: 32px;
+        }
+        
+        .info-box h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-box p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .info-box ul {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 968px) {
+            .grid {
                 grid-template-columns: 1fr;
             }
         }
         
         .panel {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            border-radius: 12px;
+            border: 1px solid #e5e5e5;
         }
         
         h2 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.5em;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            letter-spacing: -0.3px;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
             font-weight: 500;
-            color: #555;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            font-size: 14px;
         }
         
         textarea {
             width: 100%;
-            min-height: 300px;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
+            min-height: 320px;
+            padding: 14px;
+            border: 1px solid #d1d1d1;
+            border-radius: 6px;
             font-family: inherit;
             font-size: 14px;
             resize: vertical;
-            transition: border-color 0.3s;
+            transition: all 0.2s;
+            background: white;
+            line-height: 1.6;
         }
         
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #1a1a1a;
+        }
+        
+        textarea::placeholder {
+            color: #999;
         }
         
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 12px 30px;
+            padding: 11px 24px;
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            margin-top: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 16px;
+            transition: all 0.2s;
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+            background: #2d2d2d;
         }
         
         button:active {
-            transform: translateY(0);
+            transform: scale(0.98);
         }
         
         button:disabled {
-            opacity: 0.6;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: none;
         }
         
         #result {
-            min-height: 300px;
+            min-height: 320px;
         }
         
         .result-content {
@@ -127,155 +170,209 @@
         
         .result-content.show {
             display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .result-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
         }
         
         .result-section h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .result-section p {
+            color: #1a1a1a;
+            font-size: 15px;
+            line-height: 1.7;
         }
         
         .status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9em;
-            margin-left: 10px;
+            display: inline-flex;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .status-complete {
-            background: #d4edda;
-            color: #155724;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
         }
         
         .status-partial {
-            background: #fff3cd;
-            color: #856404;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
         }
         
         .status-unknown {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #f0f9ff;
+            color: #075985;
+            border: 1px solid #bae6fd;
         }
         
         .confidence-bar {
             width: 100%;
-            height: 25px;
-            background: #e0e0e0;
-            border-radius: 12px;
+            height: 32px;
+            background: #e5e5e5;
+            border-radius: 6px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         
         .confidence-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a1a;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 0.9em;
-            transition: width 0.5s ease;
+            font-size: 13px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         ul {
-            margin-top: 10px;
+            margin-top: 12px;
             padding-left: 20px;
         }
         
         li {
             margin-bottom: 8px;
-            color: #555;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
         }
         
         .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #dc3545;
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+        }
+        
+        .error h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .error p {
+            font-size: 14px;
         }
         
         .loading {
             text-align: center;
-            padding: 30px;
-            color: #667eea;
+            padding: 60px 20px;
+            color: #666;
         }
         
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e5e5e5;
+            border-top-color: #1a1a1a;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
         }
         
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
         
-        .info-box {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border-left: 4px solid #2196F3;
+        .loading p {
+            font-size: 14px;
+            color: #666;
         }
         
-        .info-box p {
-            margin: 5px 0;
-            color: #0c5460;
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state p {
+            font-size: 15px;
+            color: #666;
         }
         
         blockquote {
             margin: 8px 0;
-            padding: 8px 12px;
+            padding: 12px 16px;
             background: white;
-            border-left: 3px solid #667eea;
-            font-style: italic;
+            border-left: 3px solid #1a1a1a;
+            font-size: 14px;
             color: #666;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+            
+            .panel {
+                padding: 24px;
+            }
+            
+            textarea {
+                min-height: 240px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>AI Agent Document Analysis Demo</h1>
-        <p class="subtitle">Educational demo using FastAPI, Gemini AI, LangChain, and RAG</p>
-    </header>
-    
-    <div class="info-box">
-        <p><strong>How it works:</strong></p>
-        <p>This demo analyzes documents using an AI agent that:</p>
-        <ul>
-            <li>Uses RAG (Retrieval-Augmented Generation) with embeddings</li>
-            <li>Treats LLM output as untrusted and validates with Pydantic</li>
-            <li>Provides evidence-based analysis (no hallucination)</li>
-            <li>Returns structured JSON matching a strict schema</li>
-        </ul>
-    </div>
-    
     <div class="container">
-        <div class="panel">
-            <h2>Input Document</h2>
-            <form id="analysisForm">
-                <label for="documentText">Paste your document text below:</label>
-                <textarea 
-                    id="documentText" 
-                    name="documentText" 
-                    placeholder="Enter the document you want to analyze here...
+        <header>
+            <h1>Document Analysis Demo</h1>
+            <p class="subtitle">AI-powered document analysis using RAG and structured validation</p>
+        </header>
+        
+        <div class="info-box">
+            <h3>How it works</h3>
+            <p>This demo analyzes documents using an AI agent that:</p>
+            <ul>
+                <li>Uses RAG (Retrieval-Augmented Generation) with embeddings</li>
+                <li>Treats LLM output as untrusted and validates with Pydantic</li>
+                <li>Provides evidence-based analysis (no hallucination)</li>
+                <li>Returns structured JSON matching a strict schema</li>
+            </ul>
+        </div>
+        
+        <div class="grid">
+            <div class="panel">
+                <h2>Input Document</h2>
+                <form id="analysisForm">
+                    <label for="documentText">Paste your document text below</label>
+                    <textarea 
+                        id="documentText" 
+                        name="documentText" 
+                        placeholder="Enter the document you want to analyze here...
 
 Example:
 Project Proposal: AI-Powered Task Manager
@@ -288,24 +385,25 @@ Features:
 - Calendar integration
 
 We believe this will significantly improve productivity."
-                    required
-                ></textarea>
-                <button type="submit" id="analyzeBtn">Analyze Document</button>
-            </form>
-        </div>
-        
-        <div class="panel">
-            <h2>Analysis Result</h2>
-            <div id="result">
-                <div class="loading" style="display: none;" id="loading">
-                    <div class="spinner"></div>
-                    <p>Analyzing document with AI agent...</p>
-                </div>
-                
-                <div class="result-content" id="resultContent">
-                    <p style="color: #999; text-align: center; padding: 40px 0;">
-                        Results will appear here after analysis
-                    </p>
+                        required
+                    ></textarea>
+                    <button type="submit" id="analyzeBtn">Analyze Document</button>
+                </form>
+            </div>
+            
+            <div class="panel">
+                <h2>Analysis Result</h2>
+                <div id="result">
+                    <div class="loading" style="display: none;" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing document...</p>
+                    </div>
+                    
+                    <div class="result-content" id="resultContent">
+                        <div class="empty-state">
+                            <p>Results will appear here after analysis</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -327,14 +425,12 @@ We believe this will significantly improve productivity."
                 return;
             }
             
-            // Show loading state
             loadingDiv.style.display = 'block';
             resultDiv.classList.remove('show');
             resultDiv.innerHTML = '';
             analyzeBtn.disabled = true;
             
             try {
-                // Call API
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     headers: {
@@ -347,11 +443,9 @@ We believe this will significantly improve productivity."
                 
                 const data = await response.json();
                 
-                // Hide loading
                 loadingDiv.style.display = 'none';
                 analyzeBtn.disabled = false;
                 
-                // Display results
                 if (data.success && data.result) {
                     displayResult(data.result);
                 } else {
@@ -377,9 +471,9 @@ We believe this will significantly improve productivity."
                 
                 <div class="result-section">
                     <h3>
-                        Completeness Status
+                        Completeness
                         <span class="status-badge ${statusClass}">
-                            ${result.completeness_status.toUpperCase()}
+                            ${result.completeness_status}
                         </span>
                     </h3>
                 </div>
