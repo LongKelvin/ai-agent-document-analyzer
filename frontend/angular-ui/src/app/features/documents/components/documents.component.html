@@ -1,0 +1,231 @@
+<div class="container max-w-4xl mx-auto">
+  <!-- Header -->
+  <header class="mb-12">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Document Analyzer</h1>
+    <p class="text-gray-600">Upload documents and ask questions powered by AI</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-8 border-b border-gray-200">
+    <button
+      class="tab"
+      [class.active]="activeTab === 'upload'"
+      (click)="switchTab('upload')"
+    >
+      Upload
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab === 'qa'"
+      (click)="switchTab('qa')"
+    >
+      Ask Questions
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab === 'documents'"
+      (click)="switchTab('documents')"
+    >
+      Documents
+    </button>
+  </div>
+
+  <!-- Upload Tab -->
+  <div *ngIf="activeTab === 'upload'" class="tab-content">
+    <app-card title="Upload Document" subtitle="Supports .txt, .md, .pdf files" padding="large">
+      <!-- Upload Area -->
+      <div
+        class="upload-area"
+        [class.dragover]="dragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="triggerFileInput()"
+      >
+        <div class="upload-text">📄 Drag and drop or click to select</div>
+        <div class="upload-subtext">Supports .txt, .md, .pdf files</div>
+      </div>
+
+      <input
+        id="fileInput"
+        type="file"
+        accept=".txt,.md,.pdf"
+        (change)="onFileSelected($event)"
+        class="hidden"
+      />
+
+      <!-- Selected File Display -->
+      <div *ngIf="selectedFile" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <p class="text-sm text-gray-900">
+          <strong>Selected:</strong> {{ selectedFile.name }}
+          <span class="text-gray-600 ml-2">({{ formatFileSize(selectedFile.size) }})</span>
+        </p>
+      </div>
+
+      <!-- Upload Button -->
+      <app-button
+        *ngIf="selectedFile"
+        variant="primary"
+        [loading]="isUploading"
+        [disabled]="isUploading"
+        (clicked)="uploadFile()"
+        [fullWidth]="true"
+        class="mt-4"
+      >
+        {{ isUploading ? 'Uploading...' : 'Upload Document' }}
+      </app-button>
+
+      <!-- Success Message -->
+      <app-alert
+        *ngIf="uploadState === 'success'"
+        type="success"
+        [message]="uploadMessage"
+        [dismissible]="true"
+        class="mt-4"
+      ></app-alert>
+
+      <!-- Error Message -->
+      <app-alert
+        *ngIf="uploadState === 'error'"
+        type="error"
+        [message]="uploadError"
+        [dismissible]="true"
+        class="mt-4"
+      ></app-alert>
+    </app-card>
+  </div>
+
+  <!-- Q&A Tab -->
+  <div *ngIf="activeTab === 'qa'" class="tab-content">
+    <app-card title="Ask Questions" subtitle="Get AI-powered answers from your documents" padding="large">
+      <!-- Document Filter (Optional) -->
+      <div class="mb-4">
+        <label for="documentFilter" class="block font-medium mb-2 text-gray-900 text-sm">
+          Filter by Document (Optional)
+        </label>
+        <input
+          id="documentFilter"
+          type="text"
+          [(ngModel)]="selectedDocumentId"
+          placeholder="Enter document ID to search specific document"
+          class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-gray-900"
+        />
+      </div>
+
+      <!-- Question Input -->
+      <div class="mb-4">
+        <label for="question" class="block font-medium mb-2 text-gray-900 text-sm">
+          Your Question
+        </label>
+        <textarea
+          id="question"
+          [(ngModel)]="question"
+          placeholder="What would you like to know about your documents?"
+          class="w-full min-h-[120px] p-3.5 border border-gray-300 rounded-lg text-sm resize-y focus:outline-none focus:border-gray-900"
+          [disabled]="isQaLoading"
+        ></textarea>
+      </div>
+
+      <app-button
+        variant="primary"
+        [loading]="isQaLoading"
+        [disabled]="isQaLoading"
+        (clicked)="askQuestion()"
+        [fullWidth]="true"
+      >
+        {{ isQaLoading ? 'Searching...' : 'Ask Question' }}
+      </app-button>
+
+      <!-- Loading -->
+      <app-spinner
+        *ngIf="isQaLoading"
+        size="large"
+        message="Searching documents..."
+        [centered]="true"
+        class="mt-6"
+      ></app-spinner>
+
+      <!-- Error -->
+      <app-alert
+        *ngIf="qaState === 'error'"
+        type="error"
+        [message]="qaError"
+        [dismissible]="true"
+        class="mt-4"
+      ></app-alert>
+
+      <!-- Answer Display -->
+      <div *ngIf="hasAnswer" class="mt-6 space-y-4 animate-fade-in">
+        <div class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Answer</h3>
+          <p class="text-gray-900 text-sm leading-relaxed">{{ answer }}</p>
+        </div>
+
+        <!-- Sources -->
+        <div *ngIf="sources.length > 0" class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Sources</h3>
+          <div class="space-y-3">
+            <div *ngFor="let source of sources" class="p-3 bg-white rounded border border-gray-200">
+              <div class="text-xs text-gray-600 mb-2">
+                <strong>Source {{ source.source_number }}:</strong> {{ source.document }}
+                <span class="text-gray-400 ml-2">({{ source.document_id }})</span>
+              </div>
+              <blockquote class="pl-3 border-l-4 border-gray-300 text-gray-700 text-sm italic">
+                "{{ source.text }}"
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Documents Tab -->
+  <div *ngIf="activeTab === 'documents'" class="tab-content">
+    <app-card title="My Documents" padding="large">
+      <!-- Loading -->
+      <app-spinner
+        *ngIf="loadingDocuments"
+        size="medium"
+        message="Loading documents..."
+        [centered]="true"
+      ></app-spinner>
+
+      <!-- Error -->
+      <app-alert
+        *ngIf="documentsError"
+        type="error"
+        [message]="documentsError"
+        [dismissible]="true"
+      ></app-alert>
+
+      <!-- Empty State -->
+      <div *ngIf="!loadingDocuments && documents.length === 0 && !documentsError" class="text-center py-12">
+        <p class="text-gray-500 text-sm">No documents uploaded yet</p>
+      </div>
+
+      <!-- Document List -->
+      <div *ngIf="!loadingDocuments && documents.length > 0" class="space-y-3">
+        <div
+          *ngFor="let doc of documents"
+          class="document-item"
+        >
+          <div class="flex-1">
+            <div class="font-medium text-gray-900 text-sm">{{ doc.filename }}</div>
+            <div class="text-xs text-gray-500 mt-1">
+              {{ formatFileSize(doc.file_size) }} • Uploaded {{ formatDate(doc.upload_date) }}
+            </div>
+            <div class="text-xs text-gray-400 mt-1">ID: {{ doc.document_id }}</div>
+          </div>
+          <app-button
+            variant="danger"
+            (clicked)="deleteDocument(doc.document_id)"
+            class="delete-btn"
+          >
+            Delete
+          </app-button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>

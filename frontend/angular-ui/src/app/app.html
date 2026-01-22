@@ -1,0 +1,43 @@
+<div class="min-h-screen bg-background">
+  <!-- Navigation -->
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="container max-w-7xl mx-auto px-6">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo/Title -->
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-900">{{ title }}</h1>
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="flex items-center gap-2">
+          <a
+            routerLink="/analyze"
+            routerLinkActive="active"
+            class="nav-link"
+          >
+            Analyze
+          </a>
+          <a
+            routerLink="/documents"
+            routerLinkActive="active"
+            class="nav-link"
+          >
+            Documents
+          </a>
+          <a
+            routerLink="/health"
+            routerLinkActive="active"
+            class="nav-link"
+          >
+            Health
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="py-8 px-6">
+    <router-outlet></router-outlet>
+  </main>
+</div>
