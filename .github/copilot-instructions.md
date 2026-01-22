@@ -2,11 +2,48 @@
 
 ## Architecture Overview
 
-This is an **educational AI Agent demo** showcasing clean architecture patterns with FastAPI, Google Gemini, LangChain, and RAG (Retrieval-Augmented Generation).
+This is an **educational AI Agent demo** showcasing clean architecture patterns with FastAPI, Google Gemini, LangChain-style orchestration, and RAG (Retrieval-Augmented Generation).
 
-**Core Philosophy**: Treat LLM outputs as untrusted - all responses are validated with Pydantic schemas before use.
+The project now consists of **two main parts**:
+1. **Backend AI Agent API** (FastAPI)
+2. **Frontend Angular UI** (separate project, consuming the API)
 
-### Component Structure
+**Core Philosophy**: Treat LLM outputs as untrusted. All responses must be validated with Pydantic schemas before being used or returned to clients.
+
+---
+
+## High-Level Architecture
+
+```
+root/
+├── backend/                    # FastAPI AI Agent service
+│   └── app/
+│       ├── main.py
+│       ├── config.py
+│       ├── api/
+│       ├── agent/
+│       ├── services/
+│       ├── models/
+│       └── templates/
+│
+└── frontend/
+    └── angular-ui/              # Angular UI project
+        ├── src/
+        │   ├── app/
+        │   │   ├── core/        # API clients, interceptors, config
+        │   │   ├── features/    # Feature modules (analyze, history, health)
+        │   │   ├── shared/      # Reusable UI components
+        │   │   └── app.config.ts
+        │   └── environments/
+        └── angular.json
+```
+
+The backend remains **API-first**. The Angular UI is a consumer, not part of core agent logic.
+
+---
+
+## Backend Component Structure
+
 ```
 app/
 ├── main.py              # FastAPI entry point with startup/shutdown hooks
@@ -19,142 +56,229 @@ app/
 │   ├── llm.py           # GeminiService singleton wraps google-generativeai
 │   └── embeddings.py    # EmbeddingService with in-memory RAG (no vector DB)
 ├── models/schemas.py    # Pydantic models for validation
-└── templates/index.html # Simple web UI
+└── templates/index.html # Legacy minimal HTML UI (optional / demo only)
 ```
 
-## Critical Patterns
+---
+
+## Angular UI Architecture
+
+The Angular UI is responsible only for **presentation and interaction**.
+
+**Key responsibilities**:
+- Upload or paste documents
+- Call backend `/analyze` API
+- Render structured analysis results
+- Display validation or API errors
+- Show backend health status
+
+**Explicit non-responsibilities**:
+- No prompt logic
+- No schema validation
+- No LLM interaction
+- No business rules
+
+All intelligence lives in the backend.
+
+### Angular Core Patterns
+
+```
+app/
+├── core/
+│   ├── api/
+│   │   └── document-analyzer.api.ts   # Typed HTTP client
+│   ├── models/                        # TypeScript mirrors of Pydantic schemas
+│   ├── interceptors/                  # Error handling, logging
+│   └── config/                        # Environment-based API URLs
+│
+├── features/
+│   ├── analyze/                       # Analyze document flow
+│   ├── health/                        # Health check UI
+│   └── home/
+│
+└── shared/
+    ├── components/
+    └── ui/
+```
+
+Angular should use **typed interfaces** that mirror backend Pydantic models exactly.
+
+---
+
+## Critical Backend Patterns
 
 ### 1. Singleton Services
-All services use singleton pattern via module-level functions:
+All backend services use a singleton pattern via module-level functions:
+
 ```python
-# In services/llm.py
+# services/llm.py
 _gemini_service = None
+
 def get_gemini_service() -> GeminiService:
     global _gemini_service
     if _gemini_service is None:
         _gemini_service = GeminiService()
     return _gemini_service
 ```
-Never instantiate services directly - always use `get_*_service()` functions.
+
+Never instantiate services directly. Always use `get_*_service()`.
+
+---
 
 ### 2. RAG with In-Memory Vectors
-`app/services/embeddings.py` contains hardcoded `ANALYSIS_GUIDELINES` list that gets embedded at startup using `sentence-transformers`. Semantic search uses cosine similarity - no external vector DB required.
+
+`app/services/embeddings.py` contains a hardcoded `ANALYSIS_GUIDELINES` list embedded at startup using `sentence-transformers`.
+
+- Semantic search via cosine similarity
+- No external vector database
+- Entirely in-memory
+
+---
 
 ### 3. Structured LLM Outputs
-Agent workflow in `app/agent/agent.py`:
-1. Retrieve guidelines via `embedding_service.retrieve_relevant_guidelines()`
-2. Build prompt with `build_complete_prompt()` from `app/agent/prompts.py`
-3. Call `llm_service.generate_structured_response()` 
-4. Validate response against `AnalysisResult` Pydantic schema
-5. Return validated result or raise error
 
-**Never trust raw LLM output** - always validate with Pydantic first.
+Agent workflow (`app/agent/agent.py`):
+1. Retrieve guidelines via `embedding_service.retrieve_relevant_guidelines()`
+2. Build prompt using `build_complete_prompt()`
+3. Call `llm_service.generate_structured_response()`
+4. Validate response with `AnalysisResult` (Pydantic)
+5. Return validated JSON or raise an error
+
+Raw LLM output must never be returned directly.
+
+---
 
 ### 4. Environment Configuration
-All config via `.env` file loaded by `app/config.py`. Key variables:
+
+All backend configuration is loaded from `.env` via `app/config.py`.
+
+Key variables:
 - `GEMINI_API_KEY` (required)
-- `GEMINI_MODEL_NAME` (default: gemini-pro, supports gemini-2.0-flash, gemini-2.5-flash)
-- `TEMPERATURE` (default: 0.1 for deterministic output)
+- `GEMINI_MODEL_NAME` (default: gemini-pro)
+- `TEMPERATURE` (default: 0.1)
 - `EMBEDDING_MODEL_NAME` (default: all-MiniLM-L6-v2)
 
-Access via `from app.config import settings`.
+Access via:
+```python
+from app.config import settings
+```
+
+Angular configuration uses `environment.ts` files only and must not duplicate backend secrets.
+
+---
 
 ## Developer Workflows
 
-### Running the Application
+### Backend: Running the Application
+
 ```powershell
-# Activate venv first
 .\venv\Scripts\Activate.ps1
-
-# Run directly (no auto-reload to avoid Windows multiprocessing issues)
 python -m app.main
-
-# Or use wrapper script
-.\run.ps1
 ```
 
-**Important**: Do NOT use `--reload` flag on Windows - causes torch/multiprocessing errors with sentence-transformers.
+Do not use `--reload` on Windows.
 
-### Setup Verification
+---
+
+### Frontend: Running Angular UI
+
 ```powershell
-python check_setup.py
+cd frontend/angular-ui
+npm install
+npm start
 ```
-Validates: packages installed, API key configured, project structure correct.
 
-### Testing Changes
-No formal test suite. Manual testing via:
-1. Run application: `python -m app.main`
-2. Open browser: http://localhost:8000
-3. Submit test documents via web UI
-4. Check console logs for errors
+The Angular app should proxy API calls to the FastAPI backend during development.
 
-### Common Commands
-```powershell
-# Install dependencies
-pip install -r requirements.txt
+---
 
-# Create new .env from template
-Copy-Item .env.example .env
+## API Contract Rules (Backend to Frontend)
 
-# Automated setup
-.\setup.ps1
-```
+- API responses are always validated JSON
+- Schema changes require:
+  1. Updating Pydantic models
+  2. Updating system prompt JSON examples
+  3. Updating Angular TypeScript interfaces
+
+Backend schema is the single source of truth.
+
+---
 
 ## Project-Specific Conventions
 
 ### 1. Low Temperature (0.1)
-LLM temperature set to 0.1 for **deterministic JSON output**. Do not increase unless you want creative responses (which breaks validation).
+
+Required for deterministic JSON output. Do not increase unless schema validation is removed.
+
+---
 
 ### 2. Evidence-Based Analysis
-The agent is explicitly instructed (via system prompt) to:
-- Only cite text present in the input document
-- Provide direct quotes as evidence
-- Use confidence scores to reflect uncertainty
-- Never hallucinate missing information
 
-### 3. Prompt Engineering
-System prompt in `app/agent/prompts.py` acts as a **contract** specifying exact JSON schema. Changes to schema require updating both:
-- `app/models/schemas.py` (Pydantic model)
-- `app/agent/prompts.py` (system prompt JSON example)
+The agent must:
+- Cite only text from the input document
+- Provide direct quotes
+- Use confidence scores
+- Never hallucinate
 
-### 4. No External Dependencies for Core Logic
-- No vector database (in-memory only)
-- No database for persistence
-- No authentication/authorization
-- Minimal frontend (vanilla HTML/CSS/JS)
+---
 
-This keeps the demo simple and focused on AI Agent patterns.
+### 3. Prompt Engineering Contract
+
+The system prompt defines the JSON contract.
+
+Any schema change must be reflected in:
+- `app/models/schemas.py`
+- `app/agent/prompts.py`
+- Angular TypeScript models
+
+---
+
+### 4. No Business Logic in Angular
+
+Angular is strictly a UI layer:
+- No AI logic
+- No validation rules beyond UX
+- No prompt awareness
+
+This keeps the demo clean, testable, and educational.
+
+---
 
 ## Integration Points
 
-### Google Gemini API
-- Wrapped in `app/services/llm.py`
-- Uses `google.generativeai` library
-- Error handling: raises exceptions on API failures (no retries)
-- JSON extraction via regex `json\s*(.*?)\s*` pattern
+### FastAPI
+- CORS enabled for development
+- REST-only communication
+- No authentication
+
+### Google Gemini
+- Wrapped by `GeminiService`
+- No retries
+- Strict JSON extraction
 
 ### Sentence Transformers
-- Model downloaded on first run (~80MB for all-MiniLM-L6-v2)
-- Runs locally (no API calls)
-- Embeddings cached in memory at startup
+- Local inference only
+- In-memory embeddings
 
-### FastAPI
-- CORS enabled for all origins (development only)
-- Jinja2 templates for HTML rendering
-- Async handlers not required (no DB I/O)
+---
 
 ## Common Pitfalls
 
-1. **Windows Reload Issue**: Never use `uvicorn --reload` on Windows - causes multiprocessing errors with torch.
-2. **API Key Format**: Ensure no spaces/quotes around API key in `.env` file.
-3. **Model Names**: Use exact model names from Google (e.g., `gemini-2.0-flash`, not `gemini-2-flash`).
-4. **Pydantic Validation**: If LLM output doesn't match schema, validation fails silently - check logs.
-5. **First Run Delay**: Sentence-transformer model downloads on first execution (~1-2 minutes).
+1. Using `--reload` on Windows
+2. Changing schema without updating Angular models
+3. Letting frontend interpret LLM output
+4. Increasing temperature and breaking validation
+5. Forgetting first-run embedding model download delay
+
+---
 
 ## Extension Patterns
 
-To add new analysis capabilities:
-1. Update `ANALYSIS_GUIDELINES` in `app/services/embeddings.py`
-2. Modify `AnalysisResult` schema in `app/models/schemas.py`
-3. Update system prompt in `app/agent/prompts.py` to reflect new schema
-4. Agent orchestration (`app/agent/agent.py`) usually needs no changes
+To extend analysis capabilities:
+1. Update `ANALYSIS_GUIDELINES`
+2. Modify `AnalysisResult` schema
+3. Update system prompt JSON example
+4. Update Angular models and UI rendering
+
+The agent orchestration usually does not need changes.
+

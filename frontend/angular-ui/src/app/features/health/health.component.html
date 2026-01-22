@@ -1,0 +1,87 @@
+<div class="container max-w-3xl mx-auto">
+  <!-- Header -->
+  <header class="mb-12">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Backend Health Check</h1>
+    <p class="text-gray-600">Monitor the status of the FastAPI backend service</p>
+  </header>
+
+  <app-card title="Service Status" padding="large">
+    <!-- Loading State -->
+    <app-spinner
+      *ngIf="isLoading"
+      size="medium"
+      message="Checking backend health..."
+      [centered]="true"
+    ></app-spinner>
+
+    <!-- Error State -->
+    <div *ngIf="hasError">
+      <app-alert
+        type="error"
+        title="Connection Failed"
+        [message]="errorMessage"
+        [dismissible]="false"
+      ></app-alert>
+      <button
+        class="mt-4 px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+        (click)="checkHealth()"
+      >
+        Retry
+      </button>
+    </div>
+
+    <!-- Healthy State -->
+    <div *ngIf="isHealthy && healthData" class="space-y-6">
+      <!-- Status Badge -->
+      <div class="flex items-center gap-4">
+        <span
+          [class]="'inline-flex px-4 py-2 rounded-lg border text-sm font-medium uppercase tracking-wider ' + statusBadgeClass"
+        >
+          {{ healthData.status }}
+        </span>
+      </div>
+
+      <!-- Service Info -->
+      <div class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Service Details</h3>
+        <dl class="space-y-2">
+          <div class="flex items-center justify-between">
+            <dt class="text-sm text-gray-600">Service Name:</dt>
+            <dd class="text-sm font-medium text-gray-900">{{ healthData.service }}</dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt class="text-sm text-gray-600">Status:</dt>
+            <dd class="text-sm font-medium text-gray-900">{{ healthData.status }}</dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt class="text-sm text-gray-600">API Endpoint:</dt>
+            <dd class="text-sm font-mono text-gray-900">/api/health</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Success Message -->
+      <app-alert
+        type="success"
+        message="Backend is running and responding to requests"
+        [dismissible]="false"
+      ></app-alert>
+
+      <!-- Refresh Button -->
+      <button
+        class="w-full px-6 py-3 bg-gray-100 text-gray-900 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+        (click)="checkHealth()"
+      >
+        Refresh Status
+      </button>
+    </div>
+  </app-card>
+
+  <!-- Development Notice -->
+  <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <p class="text-sm text-blue-800">
+      <strong>ℹ Development Tool:</strong> This page is intended for development and monitoring purposes.
+      It verifies that the FastAPI backend at <code class="px-2 py-1 bg-blue-100 rounded">http://localhost:8000</code> is accessible.
+    </p>
+  </div>
+</div>
