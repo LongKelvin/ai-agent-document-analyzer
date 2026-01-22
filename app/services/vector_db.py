@@ -139,10 +139,14 @@ class VectorDBService:
                 formatted_results.append({
                     "text": results['documents'][0][i],
                     "metadata": results['metadatas'][0][i],
-                    "distance": results['distances'][0][i] if 'distances' in results else None
+                    "distance": results['distances'][0][i] if 'distances' in results else None,
+                    "similarity_score": 1 - results['distances'][0][i] if 'distances' in results else None
                 })
         
         print(f"        • Found {len(formatted_results)} results")
+        if formatted_results and 'distances' in results:
+            avg_distance = sum(results['distances'][0]) / len(results['distances'][0])
+            print(f"        • Average similarity: {1 - avg_distance:.2%}")
         return formatted_results
     
     def list_documents(self) -> List[Dict[str, Any]]:
@@ -196,14 +200,17 @@ class VectorDBService:
         """Get total number of unique documents."""
         return len(self.list_documents())
     
-    def _chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
+    def _chunk_text(self, text: str, chunk_size: int = 1000, overlap: int = 100) -> List[str]:
         """
         Split text into overlapping chunks for better retrieval.
         
+        Increased from 500 to 1000 chars to preserve more context.
+        Overlap ensures important information isn't lost at boundaries.
+        
         Args:
             text: Text to chunk
-            chunk_size: Target size of each chunk in characters
-            overlap: Overlap between chunks
+            chunk_size: Target size of each chunk in characters (default: 1000)
+            overlap: Overlap between chunks (default: 100)
             
         Returns:
             List of text chunks
@@ -217,17 +224,21 @@ class VectorDBService:
         while start < len(text):
             end = start + chunk_size
             
-            # Try to break at sentence boundary
+            # Try to break at sentence boundary for better context
             if end < len(text):
-                # Look for sentence ending
-                for char in ['. ', '.\n', '! ', '?\n', '? ']:
+                # Look for sentence ending (prefer period, then other punctuation)
+                for char in ['. ', '.\n', '! ', '!\n', '? ', '?\n']:
                     last_sentence = text[start:end].rfind(char)
                     if last_sentence > chunk_size * 0.5:  # At least 50% of chunk_size
-                        end = start + last_sentence + 1
+                        end = start + last_sentence + len(char)
                         break
             
-            chunks.append(text[start:end].strip())
+            chunk = text[start:end].strip()
+            if chunk:  # Only add non-empty chunks
+                chunks.append(chunk)
             start = end - overlap
+        
+        return chunks
         
         return chunks
 
