@@ -22,9 +22,10 @@ from app.models.schemas import (
     DocumentUploadResponse, DocumentListResponse, 
     QuestionRequest, QuestionResponse
 )
-from app.agent import get_document_analysis_agent
+from app.agent.agent import get_document_analysis_agent
 from app.agent.qa_agent import get_qa_agent
 from app.services.vector_db import get_vector_db_service
+from app.utils.file_parser import FileParser
 
 # Initialize router
 router = APIRouter()
@@ -161,14 +162,25 @@ async def upload_document(file: UploadFile = File(...)):
     """
     Upload a document to the vector database.
     
-    Supports: .txt, .md, .pdf (text-based)
+    Supports: .txt, .md, .pdf
     """
     upload_id = str(uuid.uuid4())[:8]
     try:
         print(f"\n{'='*70}")
-        print(f"[UPLOAD {upload_id}] NEW DOCUMENT UPLOAD")
+        print(f"📤 [UPLOAD {upload_id}] NEW DOCUMENT UPLOAD")
         print(f"{'='*70}")
         print(f"[{upload_id}] Filename: {file.filename}")
+        
+        # Check if file format is supported
+        if not FileParser.is_supported(file.filename):
+            file_ext = file.filename.lower().split('.')[-1] if '.' in file.filename else 'unknown'
+            print(f"[{upload_id}] ❌ Unsupported format: .{file_ext}")
+            print(f"{'='*70}\n")
+            return DocumentUploadResponse(
+                success=False,
+                message=f"Unsupported file format: .{file_ext}",
+                error=f"Supported formats: {', '.join('.' + ext for ext in FileParser.get_supported_extensions())}"
+            )
         
         # Generate unique document ID
         document_id = str(uuid.uuid4())
@@ -177,11 +189,26 @@ async def upload_document(file: UploadFile = File(...)):
         # Read file content
         print(f"[{upload_id}] Step 1/4: Reading file content...")
         content = await file.read()
-        text = content.decode('utf-8')
-        print(f"[{upload_id}] ✓ File read complete - {len(text)} characters")
+        file_ext = file.filename.lower().split('.')[-1]
+        print(f"[{upload_id}]   • File type: .{file_ext}")
+        print(f"[{upload_id}]   • File size: {len(content):,} bytes")
+        
+        # Parse file based on format (DO NOT decode as UTF-8 first!)
+        print(f"[{upload_id}] Step 2/4: Extracting text from {file_ext.upper()}...")
+        try:
+            text = FileParser.parse_text(content, file.filename)
+            print(f"[{upload_id}]   ✓ Text extracted - {len(text):,} characters")
+        except ValueError as e:
+            print(f"[{upload_id}]   ❌ Parsing failed: {str(e)}")
+            print(f"{'='*70}\n")
+            return DocumentUploadResponse(
+                success=False,
+                message="Failed to parse file",
+                error=str(e)
+            )
         
         if len(text) < 50:
-            print(f"[{upload_id}] Document too short: {len(text)} < 50 characters")
+            print(f"[{upload_id}] ❌ Document too short: {len(text)} < 50 characters")
             print(f"{'='*70}\n")
             return DocumentUploadResponse(
                 success=False,
@@ -190,23 +217,23 @@ async def upload_document(file: UploadFile = File(...)):
             )
         
         # Get vector DB service
-        print(f"[{upload_id}] Step 2/4: Initializing Vector DB service...")
+        print(f"[{upload_id}] Step 3/4: Initializing Vector DB service...")
         vector_db = get_vector_db_service()
-        print(f"[{upload_id}] ✓ Vector DB ready")
+        print(f"[{upload_id}]   ✓ Vector DB ready")
         
         # Add document with metadata
-        print(f"[{upload_id}] Step 3/4: Generating embeddings and storing in Vector DB...")
+        print(f"[{upload_id}] Step 4/4: Generating embeddings and storing in Vector DB...")
         metadata = {
             "filename": file.filename,
             "upload_date": datetime.now().isoformat(),
-            "file_size": len(text)
+            "file_size": len(text),
+            "file_type": file_ext
         }
         
         vector_db.add_document(document_id, text, metadata)
-        print(f"[{upload_id}] ✓ Document stored in vector database")
+        print(f"[{upload_id}]   ✓ Document stored in vector database")
         
-        print(f"[{upload_id}] Step 4/4: Upload complete!")
-        print(f"[{upload_id}] DOCUMENT UPLOADED SUCCESSFULLY")
+        print(f"[{upload_id}] ✅ DOCUMENT UPLOADED SUCCESSFULLY")
         print(f"{'='*70}\n")
         
         return DocumentUploadResponse(
@@ -216,16 +243,17 @@ async def upload_document(file: UploadFile = File(...)):
             message=f"Document '{file.filename}' uploaded successfully"
         )
     
-    except UnicodeDecodeError:
-        print(f"[{upload_id}] ENCODING ERROR: File not in UTF-8 format")
+    except UnicodeDecodeError as e:
+        print(f"[{upload_id}] ❌ ENCODING ERROR: File not in UTF-8 format")
+        print(f"[{upload_id}] Error details: {str(e)}")
         print(f"{'='*70}\n")
         return DocumentUploadResponse(
             success=False,
             message="Failed to read file",
-            error="File must be in UTF-8 text format"
+            error="Text file must be in UTF-8 format"
         )
     except Exception as e:
-        print(f"[{upload_id}] UPLOAD FAILED: {type(e).__name__}")
+        print(f"[{upload_id}] ❌ UPLOAD FAILED: {type(e).__name__}")
         print(f"[{upload_id}] Error details: {str(e)}")
         print(f"{'='*70}\n")
         return DocumentUploadResponse(
