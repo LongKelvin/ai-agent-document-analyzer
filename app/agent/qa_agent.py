@@ -43,7 +43,7 @@ class QAAgent:
             Dict with 'answer' and 'sources' keys
         """
         # Step 1: Retrieve relevant context
-        print(f"    → Sub-step 2.1: Retrieving relevant context from Vector DB...")
+        print(f"      → Sub-step 2.1: Retrieving relevant context from Vector DB...")
         print(f"      • Query: {question[:60]}...")
         print(f"      • Top K: {top_k}")
         search_results = self.vector_db.search(
@@ -59,7 +59,12 @@ class QAAgent:
                 "sources": []
             }
         
-        print(f"      • Found {len(search_results)} relevant chunks")
+        print(f"      • Found {len(search_results)} relevant chunks:")
+        for idx, result in enumerate(search_results, 1):
+            chunk_idx = result['metadata'].get('chunk_index', 0)
+            total_chunks = result['metadata'].get('total_chunks', 1)
+            filename = result['metadata'].get('filename', 'Unknown')
+            print(f"        [{idx}] {filename} - Chunk {chunk_idx+1}/{total_chunks} ({len(result['text'])} chars)")
         print(f"      ✓ Context retrieved")
         
         # Step 2: Build context from search results
@@ -68,11 +73,19 @@ class QAAgent:
         sources = []
         
         for i, result in enumerate(search_results, 1):
+            # Full text for LLM context (no truncation)
             context_parts.append(f"[Source {i}]: {result['text']}")
+            
+            # For user display: show full chunk (no truncation)
+            # Since chunks are now 1000 chars with sentence boundaries,
+            # showing the full chunk gives complete context
+            text = result['text']
+            chunk_info = f"(Chunk {result['metadata'].get('chunk_index', 0)+1}/{result['metadata'].get('total_chunks', 1)})"
+            
             sources.append({
                 "source_number": str(i),
-                "text": result['text'][:200] + "..." if len(result['text']) > 200 else result['text'],
-                "document": result['metadata'].get('filename', 'Unknown'),
+                "text": text,  # Show full chunk text, no truncation
+                "document": result['metadata'].get('filename', 'Unknown') + " " + chunk_info,
                 "document_id": result['metadata'].get('document_id', 'Unknown')
             })
         
