@@ -1,0 +1,136 @@
+<div class="container max-w-7xl mx-auto">
+  <!-- Header -->
+  <header class="mb-12">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-2 tracking-tight">Document Analysis Demo</h1>
+    <p class="text-gray-600">Analyze documents for completeness and clarity using AI</p>
+  </header>
+
+  <!-- Info Box -->
+  <app-card padding="medium" class="mb-8">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">How it works</h3>
+    <p class="text-gray-600 text-sm mb-2">
+      This demo uses a Gemini LLM to analyze document completeness and clarity.
+    </p>
+    <p class="text-gray-600 text-sm mb-3">
+      The system performs RAG (Retrieval-Augmented Generation) by embedding analysis guidelines
+      and retrieving relevant criteria based on your document.
+    </p>
+    <ul class="list-disc pl-5 space-y-1">
+      <li class="text-gray-600 text-sm">The LLM output is validated against a strict Pydantic schema</li>
+      <li class="text-gray-600 text-sm">All evidence is quoted directly from the input document</li>
+      <li class="text-gray-600 text-sm">Temperature is set to 0.1 for deterministic JSON output</li>
+    </ul>
+  </app-card>
+
+  <!-- Main Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Input Panel -->
+    <app-card title="Input Document" padding="large">
+      <form (ngSubmit)="onSubmit()">
+        <label for="documentText" class="block font-medium mb-2 text-gray-900 text-sm">
+          Document Text
+        </label>
+        <textarea
+          id="documentText"
+          name="documentText"
+          [(ngModel)]="documentText"
+          placeholder="Paste your document text here for analysis..."
+          class="w-full min-h-[320px] p-3.5 border border-gray-300 rounded-lg font-sans text-sm resize-y transition-all duration-200 bg-white leading-relaxed focus:outline-none focus:border-gray-900"
+          [disabled]="isLoading"
+        ></textarea>
+
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="isLoading"
+          [disabled]="isLoading"
+          [fullWidth]="true"
+        >
+          {{ isLoading ? 'Analyzing...' : 'Analyze Document' }}
+        </app-button>
+      </form>
+    </app-card>
+
+    <!-- Result Panel -->
+    <app-card title="Analysis Result" padding="large">
+      <div class="min-h-[320px]">
+        <!-- Loading State -->
+        <app-spinner
+          *ngIf="isLoading"
+          size="large"
+          message="Analyzing your document..."
+          [centered]="true"
+        ></app-spinner>
+
+        <!-- Error State -->
+        <app-alert
+          *ngIf="hasError"
+          type="error"
+          title="Error"
+          [message]="errorMessage"
+          [dismissible]="true"
+        ></app-alert>
+
+        <!-- Empty State -->
+        <div *ngIf="viewState === 'idle'" class="text-center py-16 text-gray-500">
+          <p>Results will appear here after analysis</p>
+        </div>
+
+        <!-- Success State -->
+        <div *ngIf="hasResult" class="space-y-6 animate-fade-in">
+          <!-- Summary -->
+          <div class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Summary</h3>
+            <p class="text-gray-900 text-sm leading-relaxed">{{ analysisResult!.summary }}</p>
+          </div>
+
+          <!-- Completeness Status -->
+          <div class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-3">
+              Completeness
+              <span [class]="'inline-flex px-3 py-1 rounded border text-xs font-medium uppercase tracking-wider ' + statusBadgeClass">
+                {{ analysisResult!.completeness_status }}
+              </span>
+            </h3>
+          </div>
+
+          <!-- Missing Points -->
+          <div *ngIf="analysisResult!.missing_points.length > 0" class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Missing Points</h3>
+            <ul class="list-disc pl-5 space-y-2">
+              <li *ngFor="let point of analysisResult!.missing_points" class="text-gray-900 text-sm leading-relaxed">
+                {{ point }}
+              </li>
+            </ul>
+          </div>
+
+          <!-- Evidence -->
+          <div *ngIf="analysisResult!.evidence.length > 0" class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Evidence</h3>
+            <div class="space-y-3">
+              <blockquote
+                *ngFor="let ev of analysisResult!.evidence"
+                class="pl-4 border-l-4 border-gray-300 text-gray-700 text-sm leading-relaxed italic"
+              >
+                "{{ ev }}"
+              </blockquote>
+            </div>
+          </div>
+
+          <!-- Confidence Score -->
+          <div class="p-5 bg-gray-50 rounded-lg border border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider">Confidence Score</h3>
+            <div class="w-full h-8 bg-gray-200 rounded-lg overflow-hidden">
+              <div
+                class="h-full bg-gray-900 flex items-center justify-center text-white text-xs font-medium transition-all duration-500"
+                [style.width.%]="confidencePercent"
+              >
+                {{ confidencePercent }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>
